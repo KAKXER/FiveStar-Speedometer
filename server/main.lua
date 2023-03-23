@@ -17,7 +17,7 @@ Citizen.CreateThread(function()
                     os.exit()
                     return
                 elseif (type(Version) ~= "table" and Version == nil) or (type(VersionMain) ~= "number" and VersionMain == nil) then
-                    print("^8The data Request is invalid |  Please contact support [discord.gg/r95QhVzu4F]^0")
+                    print("^8The data Request is invalid^0")
                     Wait(500)
                     os.exit()
                     return
