@@ -4,7 +4,7 @@ game 'gta5'
 name "FiveStar-Speedometer"
 description "Speedometer by FiveStar"
 author "FiveStar Development | 5star.tebex.io | Discord/HdEzqEJBdh"
-version "1.1"
+version "1.2"
 lua54 'yes'
 
 client_scripts {
