@@ -1,36 +1,21 @@
 Citizen.CreateThread(function()
     local resourcename = "FiveStar-Speedometer"
     if resourcename == GetCurrentResourceName() then
-        local VersionMetaData = tonumber(GetResourceMetadata(resourcename, "version"))
-        if VersionMetaData ~= nil and type(VersionMetaData) then
-            PerformHttpRequest("https://raw.githubusercontent.com/kakxer/fivestar-version/master/Version.json", function(errorCode, resultData, resultHeaders)
-                local Version = json.decode(resultData)
-                if Version == nil then
-                    print("A connection to check your Update Version could not be established")
-                    Wait(500)
-                    os.exit()
-                end
-                local VersionMain = Version[resourcename]
-                if errorCode ~= 200 then
-                    print("A connection to check your Update Version could not be established")
-                    Wait(500)
-                    os.exit()
-                    return
-                elseif (type(Version) ~= "table" and Version == nil) or (type(VersionMain) ~= "number" and VersionMain == nil) then
-                    print("^8The data Request is invalid^0")
-                    Wait(500)
-                    os.exit()
-                    return
-                elseif VersionMetaData == VersionMain then
+        local GetVersion = tonumber(GetResourceMetadata(resourcename, "version"))
+        if GetVersion ~= nil and type(GetVersion) == "number" then
+            local VersionMetaData = tonumber(string.format("%.2f", GetVersion))
+            local function PrintData(IsStarted)
+                if IsStarted then
                     local color = {
                         [1] = math.random(1, 9),
                         [2] = math.random(1, 9),
                         [3] = math.random(1, 9),
                         [4] = math.random(1, 9)
                     }
-                    if GetConvar("FiveStar", "disable") == "enable" then
+                    if GetConvar("FiveStar", "enable") == "enable" then
                         SetConvar("FiveStar", "disable")
-                        print("^" .. color[3] .. "            Hello, Welcome To ^" .. color[2] .. "FiveStar Development ^" ..color[3])
+                        print("")
+                        print("^" .. color[3] .. "            Hello, Welcome To ^" .. color[2] .. "FiveStar Development ^" .. color[3])
                         print(" ███████╗██╗██╗   ██╗███████╗███████╗████████╗ █████╗ ██████╗  ")
                         print(" ██╔════╝██║██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗ ")
                         print(" ██╔════╝██║██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗ ")
@@ -39,31 +24,58 @@ Citizen.CreateThread(function()
                         print(" ██║     ██║ ╚████╔╝ ███████╗███████║   ██║   ██║  ██║██║  ██║ ")
                         print(" ╚═╝     ╚═╝  ╚═══╝  ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ")
                         print("                    ^" .. color[2] .. "FiveStar Development                      ")
-                        print("                    Discord.gg/PK6g3CMe5z                     ")
-                        print("             Resource Name: ^" .. color[1] .. "" .. resourcename .. "                ^" .. color[3])
-                        print("                    Resource Version: ^" .. color[1] .. "" .. VersionMain .. "                ^" .. color[3])
+                        print("                https://discord.5star.codes                ")
+                        print("               Resource Name: ^" .. color[1] .. "" .. resourcename .. "                ^" .. color[3])
+                        print("                    Resource Version: ^" .. color[1] .. "" .. VersionMetaData .. "                ^" .. color[3] .. "^0")
                     else
                         print("                    ^" .. color[2] .. "FiveStar Development                      ")
-                        print("             Resource Name: ^" .. color[1] .. "" .. resourcename .. "                ^" .. color[3])
-                        print("                    Resource Version: ^" .. color[1] .. "" .. VersionMain .. "                ^" .. color[3])
+                        print("               Resource Name: ^" .. color[1] .. "" .. resourcename .. "                ^" .. color[3])
+                        print("                    Resource Version: ^" .. color[1] .. "" .. VersionMetaData .. "                ^" .. color[3] .. "^0")
                     end
                 else
-                    print("^2UPDATE: The new Update of "..resourcename.." Version ["..VersionMain.."] has been Released, please go to your ControlPanel and update the "..resourcename.." Script.")
-                    Citizen.Wait(500)
-                    print("^2UPDATE: The new Update of "..resourcename.." Version ["..VersionMain.."] has been Released, please go to your ControlPanel and update the "..resourcename.." Script.")
+                    Wait(500)
                     os.exit()
-                end              
-            end)
+                end
+            end
+
+            if Config.CheckVersion then
+                local function CheckVersion()
+                    PerformHttpRequest("https://raw.githubusercontent.com/kakxer/fivestar-version/master/Version.json", function(errorCode, resultData, resultHeaders)
+                        local Version = json.decode(resultData)
+                        if Version == nil then
+                            print("A connection to check your Update Version could not be established")
+                            return false
+                        end
+                        local VersionMain = Version[resourcename]
+                        if errorCode ~= 200 then
+                            print("A connection to check your Update Version could not be established")
+                            return false
+                        elseif (type(Version) ~= "table" and Version == nil) or
+                            (type(VersionMain) ~= "number" and VersionMain == nil) then
+                            print("^8The data Request is invalid |  Please contact support [https://discord.5star.codes]^0")
+                            return false
+                        elseif VersionMetaData == VersionMain then
+                          return true
+                        else
+                            print("^2UPDATE: The new Update of " .. resourcename .. " Version [" .. VersionMain ..
+                                        "] has been Released, please go to your ControlPanel and update the " .. resourcename ..
+                                        " Script.")
+                            return false
+                        end
+                    end, "GET")
+                end
+                PrintData(CheckVersion())
+            else
+                PrintData(true)
+            end       
         else
             print("^8ERROR: Please Change the Script Version in fxmanifest.lua and Change to Default Mode")
-            Citizen.Wait(500)
-            print("^8ERROR: Please Change the Script Version in fxmanifest.lua and Change to Default Mode")
+            Wait(500)
             os.exit()
         end
     else
-        print("^8WARNING: Source Name ".. resourcename .." Do Change This Source Name!")
-        Citizen.Wait(500)
-        print("^8WARNING: Source Name ".. resourcename .." Do Change This Source Name!")
+        print("^8WARNING: Source Name " .. resourcename .. " Do Change This Source Name!")
+        Wait(500)
         os.exit()
     end
 end)
